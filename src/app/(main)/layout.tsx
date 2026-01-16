@@ -5,7 +5,7 @@ import React from "react";
 const { Header, Content, Sider } = Layout;
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Layout>
+    <Layout style={{ height: "100%" }}>
       {" "}
       <Sider>
         <div className="demo-logo-vertical" />

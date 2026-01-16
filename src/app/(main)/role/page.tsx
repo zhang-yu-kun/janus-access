@@ -14,7 +14,7 @@ interface DataType {
   email: string;
 }
 
-const SearchTablePage: React.FC = () => {
+const page: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState<DataType[]>([
@@ -196,4 +196,4 @@ const SearchTablePage: React.FC = () => {
   );
 };
 
-export default SearchTablePage;
+export default page;
