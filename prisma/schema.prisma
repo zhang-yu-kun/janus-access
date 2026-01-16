@@ -6,25 +6,18 @@ datasource db {
   provider = "postgresql"
 }
 
-// ========================
-// RBAC 核心模型
-// ========================
-
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?    @unique
   emailVerified DateTime?
   image         String?
   password      String? // 可选：如果你支持邮箱密码登录（非 OAuth）
-
-  // RBAC 关联
-  userRoles UserRole[]
-  roleIds   String[] // 可选：用于快速查询（非必须，可删）
-
-  // 时间戳
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  // 关联
+  userRoles     UserRole[]
+  roleIds       String[] // 可选：用于快速查询（非必须，可删）
 
   @@map("users")
 }
@@ -36,12 +29,12 @@ model Role {
 
   // 关联
   userRoles       UserRole[]
+  menuRoles       MenuRole[]
   permissions     Permission[]     @relation("RolePermissions")
   permissionRoles PermissionRole[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  menuRoles MenuRole[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("roles")
 }
