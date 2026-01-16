@@ -1,5 +1,9 @@
 packages:
   - .
+
 ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - '@prisma/engines'
+  - prisma
   - sharp
   - unrs-resolver
