@@ -1,13 +1,14 @@
-// src/app/(auth)/login/page.tsx
 "use client";
 
 import React, { useState } from "react";
 import { LockOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, Card, Tabs, message } from "antd";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import type { SignInResponse } from "next-auth/react";
 
 type LoginFieldType = {
-  username?: string;
+  email?: string;
   password?: string;
   remember?: boolean;
 };
@@ -24,17 +25,23 @@ const LoginPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("login");
   const router = useRouter();
 
-  const onFinishLogin = (values: any) => {
-    console.log("Login values:", values);
+  const onFinishLogin = async (values: any) => {
     setLoading(true);
 
-    // 模拟登录请求
-    setTimeout(() => {
-      setLoading(false);
-      message.success("Login successful!");
-      // 这里可以跳转到主页
-      router.push("/home");
-    }, 1500);
+    const res = (await signIn("credentials", {
+      ...values,
+      redirect: false,
+    })) as SignInResponse | undefined;
+
+    console.log("res:", res);
+
+    if (res?.ok) {
+      message.success("登录成功");
+    } else {
+      message.error("登录失败");
+    }
+
+    setLoading(false);
   };
 
   const onFinishRegister = (values: any) => {
@@ -85,7 +92,7 @@ const LoginPage: React.FC = () => {
                   size="large"
                 >
                   <Form.Item<LoginFieldType>
-                    name="username"
+                    name="email"
                     rules={[
                       {
                         required: true,
@@ -93,7 +100,7 @@ const LoginPage: React.FC = () => {
                       },
                     ]}
                   >
-                    <Input prefix={<UserOutlined />} placeholder="Username" />
+                    <Input prefix={<UserOutlined />} placeholder="email" />
                   </Form.Item>
 
                   <Form.Item<LoginFieldType>
@@ -111,7 +118,7 @@ const LoginPage: React.FC = () => {
                     />
                   </Form.Item>
 
-                  <Form.Item<LoginFieldType>
+                  {/* <Form.Item<LoginFieldType>
                     name="remember"
                     valuePropName="checked"
                   >
@@ -119,7 +126,7 @@ const LoginPage: React.FC = () => {
                     <a style={{ float: "right" }} href="#">
                       忘记密码?
                     </a>
-                  </Form.Item>
+                  </Form.Item> */}
 
                   <Form.Item>
                     <Button
@@ -200,7 +207,7 @@ const LoginPage: React.FC = () => {
                             return Promise.resolve();
                           }
                           return Promise.reject(
-                            new Error("The two passwords do not match!")
+                            new Error("The two passwords do not match!"),
                           );
                         },
                       }),
