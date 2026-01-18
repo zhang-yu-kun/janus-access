@@ -6,6 +6,7 @@ import { Button, Checkbox, Form, Input, Card, Tabs, message } from "antd";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import type { SignInResponse } from "next-auth/react";
+import send from "@/utils/send";
 
 type LoginFieldType = {
   email?: string;
@@ -14,7 +15,7 @@ type LoginFieldType = {
 };
 
 type RegisterFieldType = {
-  username?: string;
+  userName?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
@@ -27,6 +28,7 @@ const LoginPage: React.FC = () => {
 
   const onFinishLogin = async (values: any) => {
     setLoading(true);
+    console.log("values", values);
 
     const res = (await signIn("credentials", {
       ...values,
@@ -44,16 +46,14 @@ const LoginPage: React.FC = () => {
     setLoading(false);
   };
 
-  const onFinishRegister = (values: any) => {
+  const onFinishRegister = async (values: any) => {
     console.log("Register values:", values);
     setLoading(true);
-
-    // 模拟注册请求
-    setTimeout(() => {
-      setLoading(false);
-      message.success("Registration successful!");
-      setActiveTab("login"); // 注册成功后切换到登录页面
-    }, 1500);
+    const res = await send.post("/auth/register", values);
+    if (res.success) {
+      message.success(res.message);
+      setActiveTab("login");
+    }
   };
 
   return (
@@ -157,7 +157,7 @@ const LoginPage: React.FC = () => {
                   size="large"
                 >
                   <Form.Item<RegisterFieldType>
-                    name="username"
+                    name="userName"
                     rules={[
                       {
                         required: true,

@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, userName } = await request.json();
 
     // 输入验证
     if (!email || !password) {
@@ -44,6 +44,7 @@ export async function POST(request: Request) {
     // 创建新用户
     const newUser = await prisma.user.create({
       data: {
+        userName,
         email: email.toLowerCase(),
         password: hashedPassword,
         // 如果有其他字段如姓名等，可以在这里添加
