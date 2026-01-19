@@ -4,7 +4,6 @@ import { Layout, Menu } from "antd";
 import React, { useEffect, useState } from "react";
 import { Menu as MenuTy } from "@prisma/client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 const { Header, Content, Sider } = Layout;
 
@@ -15,7 +14,6 @@ type MenuItem = {
 };
 const layout = ({ children }: { children: React.ReactNode }) => {
   const [menus, setMenus] = useState<MenuItem[]>([]);
-  const pathname = usePathname();
   useEffect(() => {
     (async () => {
       const res = await send.get("/queryMenu");

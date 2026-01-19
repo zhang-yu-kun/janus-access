@@ -1,59 +1,23 @@
-// pages/search-table.tsx 或 app/search-table/page.tsx
 "use client";
 
-import React, { useState } from "react";
-import { Table, Input, Button, Space, Card, Row, Col } from "antd";
+import React, { useState, useEffect } from "react";
+import { Table, Input, Button, Space, Card, Row, Col, Switch } from "antd";
 import type { TableProps } from "antd";
 import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
-
-interface DataType {
-  key: React.Key;
-  name: string;
-  age: number;
-  address: string;
-  email: string;
-}
+import { Menu as MenuTy } from "@prisma/client";
+import send from "@/utils/send";
 
 const page: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [dataSource, setDataSource] = useState<DataType[]>([
-    {
-      key: "1",
-      name: "John Brown",
-      age: 32,
-      address: "New York No. 1 Lake Park",
-      email: "john@example.com",
-    },
-    {
-      key: "2",
-      name: "Jim Green",
-      age: 42,
-      address: "London No. 1 Lake Park",
-      email: "jim@example.com",
-    },
-    {
-      key: "3",
-      name: "Joe Black",
-      age: 32,
-      address: "Sydney No. 1 Lake Park",
-      email: "joe@example.com",
-    },
-    {
-      key: "4",
-      name: "Jane Doe",
-      age: 28,
-      address: "Paris No. 1 Lake Park",
-      email: "jane@example.com",
-    },
-    {
-      key: "5",
-      name: "Tom Wilson",
-      age: 35,
-      address: "Tokyo No. 1 Lake Park",
-      email: "tom@example.com",
-    },
-  ]);
+  const [dataSource, setDataSource] = useState<MenuTy[]>([]);
+  const [menus, setMenus] = useState<MenuTy[]>([]);
+  useEffect(() => {
+    (async () => {
+      const res = await send.get("/queryMenu");
+      setMenus(res.data);
+    })();
+  }, []);
 
   const handleSearch = (value: string) => {
     setLoading(true);
@@ -62,8 +26,8 @@ const page: React.FC = () => {
     setTimeout(() => {
       const filteredData = dataSource.filter((item) =>
         Object.values(item).some((val) =>
-          String(val).toLowerCase().includes(value.toLowerCase())
-        )
+          String(val).toLowerCase().includes(value.toLowerCase()),
+        ),
       );
 
       setDataSource(filteredData);
@@ -73,71 +37,23 @@ const page: React.FC = () => {
 
   const handleReset = () => {
     setSearchText("");
-    setLoading(true);
-
-    // 恢复原始数据
-    setTimeout(() => {
-      setDataSource([
-        {
-          key: "1",
-          name: "John Brown",
-          age: 32,
-          address: "New York No. 1 Lake Park",
-          email: "john@example.com",
-        },
-        {
-          key: "2",
-          name: "Jim Green",
-          age: 42,
-          address: "London No. 1 Lake Park",
-          email: "jim@example.com",
-        },
-        {
-          key: "3",
-          name: "Joe Black",
-          age: 32,
-          address: "Sydney No. 1 Lake Park",
-          email: "joe@example.com",
-        },
-        {
-          key: "4",
-          name: "Jane Doe",
-          age: 28,
-          address: "Paris No. 1 Lake Park",
-          email: "jane@example.com",
-        },
-        {
-          key: "5",
-          name: "Tom Wilson",
-          age: 35,
-          address: "Tokyo No. 1 Lake Park",
-          email: "tom@example.com",
-        },
-      ]);
-      setLoading(false);
-    }, 300);
   };
 
-  const columns: TableProps<DataType>["columns"] = [
+  const columns: TableProps<MenuTy>["columns"] = [
+    { title: "菜单名称", dataIndex: "menuName" },
+    { title: "菜单路径", dataIndex: "menuKey" },
+    { title: "父路径", dataIndex: "parentKey" },
+    { title: "排序", dataIndex: "sort" },
     {
-      title: "Name",
-      dataIndex: "name",
-      sorter: (a, b) => a.name.localeCompare(b.name),
-      sortDirections: ["descend", "ascend"],
-    },
-    {
-      title: "Age",
-      dataIndex: "age",
-      sorter: (a, b) => a.age - b.age,
-      sortDirections: ["descend", "ascend"],
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
+      title: "状态开关",
+      dataIndex: "action",
+      render: (_, record) => (
+        <Switch
+          size="small"
+          disabled={record.menuKey === "/menu"}
+          checked={record.status === "1"}
+        />
+      ),
     },
   ];
 
@@ -180,8 +96,9 @@ const page: React.FC = () => {
       {/* 表格区域 */}
       <Card style={{ marginTop: "16px" }}>
         <Table
+          rowKey="menuKey"
           columns={columns}
-          dataSource={dataSource}
+          dataSource={menus}
           loading={loading}
           pagination={{
             showSizeChanger: true,

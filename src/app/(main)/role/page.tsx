@@ -2,59 +2,36 @@
 "use client";
 
 import React, { useState } from "react";
-import { Table, Input, Button, Space, Card, Row, Col } from "antd";
+import { Table, Input, Button, Space, Card, Row, Col, Modal, Form } from "antd";
 import type { TableProps } from "antd";
 import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
+import { Role } from "@prisma/client";
 
-interface DataType {
-  key: React.Key;
-  name: string;
-  age: number;
-  address: string;
-  email: string;
-}
-
+type Props = { open: boolean; status: "add" | "edit"; onClose: () => void };
+const Edit = ({ open, status, onClose }: Props) => {
+  const onFinish = (values: Role) => {
+    console.log("Success:", values);
+    onClose();
+  };
+  return (
+    <Modal open={open} title="角色" onCancel={onClose}>
+      <Form onFinish={onFinish}>
+        <Form.Item label="角色名称" name="name">
+          <Input />
+        </Form.Item>
+        <Form.Item label="角色描述" name="descript">
+          <Input />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
 const page: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [dataSource, setDataSource] = useState<DataType[]>([
-    {
-      key: "1",
-      name: "John Brown",
-      age: 32,
-      address: "New York No. 1 Lake Park",
-      email: "john@example.com",
-    },
-    {
-      key: "2",
-      name: "Jim Green",
-      age: 42,
-      address: "London No. 1 Lake Park",
-      email: "jim@example.com",
-    },
-    {
-      key: "3",
-      name: "Joe Black",
-      age: 32,
-      address: "Sydney No. 1 Lake Park",
-      email: "joe@example.com",
-    },
-    {
-      key: "4",
-      name: "Jane Doe",
-      age: 28,
-      address: "Paris No. 1 Lake Park",
-      email: "jane@example.com",
-    },
-    {
-      key: "5",
-      name: "Tom Wilson",
-      age: 35,
-      address: "Tokyo No. 1 Lake Park",
-      email: "tom@example.com",
-    },
-  ]);
-
+  const [dataSource, setDataSource] = useState<Role[]>([]);
+  const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState<Props["status"]>("add");
   const handleSearch = (value: string) => {
     setLoading(true);
 
@@ -62,8 +39,8 @@ const page: React.FC = () => {
     setTimeout(() => {
       const filteredData = dataSource.filter((item) =>
         Object.values(item).some((val) =>
-          String(val).toLowerCase().includes(value.toLowerCase())
-        )
+          String(val).toLowerCase().includes(value.toLowerCase()),
+        ),
       );
 
       setDataSource(filteredData);
@@ -74,70 +51,25 @@ const page: React.FC = () => {
   const handleReset = () => {
     setSearchText("");
     setLoading(true);
-
-    // 恢复原始数据
-    setTimeout(() => {
-      setDataSource([
-        {
-          key: "1",
-          name: "John Brown",
-          age: 32,
-          address: "New York No. 1 Lake Park",
-          email: "john@example.com",
-        },
-        {
-          key: "2",
-          name: "Jim Green",
-          age: 42,
-          address: "London No. 1 Lake Park",
-          email: "jim@example.com",
-        },
-        {
-          key: "3",
-          name: "Joe Black",
-          age: 32,
-          address: "Sydney No. 1 Lake Park",
-          email: "joe@example.com",
-        },
-        {
-          key: "4",
-          name: "Jane Doe",
-          age: 28,
-          address: "Paris No. 1 Lake Park",
-          email: "jane@example.com",
-        },
-        {
-          key: "5",
-          name: "Tom Wilson",
-          age: 35,
-          address: "Tokyo No. 1 Lake Park",
-          email: "tom@example.com",
-        },
-      ]);
-      setLoading(false);
-    }, 300);
   };
 
-  const columns: TableProps<DataType>["columns"] = [
+  const columns: TableProps<Role>["columns"] = [
+    { title: "角色名称", dataIndex: "name" },
+    { title: "角色描述", dataIndex: "description" },
     {
-      title: "Name",
-      dataIndex: "name",
-      sorter: (a, b) => a.name.localeCompare(b.name),
-      sortDirections: ["descend", "ascend"],
-    },
-    {
-      title: "Age",
-      dataIndex: "age",
-      sorter: (a, b) => a.age - b.age,
-      sortDirections: ["descend", "ascend"],
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
+      title: "操作",
+      dataIndex: "action",
+      render: (_, record) => (
+        <Button
+          type="link"
+          onClick={() => {
+            setOpen(true);
+            setStatus("edit");
+          }}
+        >
+          编辑
+        </Button>
+      ),
     },
   ];
 
@@ -172,6 +104,14 @@ const page: React.FC = () => {
               >
                 重置
               </Button>
+              <Button
+                onClick={() => {
+                  setOpen(true);
+                  setStatus("add");
+                }}
+              >
+                新增
+              </Button>
             </Space>
           </Col>
         </Row>
@@ -192,6 +132,8 @@ const page: React.FC = () => {
           }}
         />
       </Card>
+
+      <Edit open={open} status={status} onClose={() => setOpen(false)} />
     </div>
   );
 };
