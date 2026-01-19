@@ -17,12 +17,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!user || !user.password) {
           return null;
         }
+
         // 使用 bcryptjs 验证密码
         const isValid = await bcrypt.compare(
           credentials.password as string,
           user.password,
         );
-        return isValid ? user : null;
+        if (!isValid) {
+          return null;
+        }
+
+        return user;
       },
     }),
   ],

@@ -37,10 +37,11 @@ const LoginPage: React.FC = () => {
 
     console.log("res:", res);
 
-    if (res?.ok) {
-      message.success("登录成功");
-    } else {
+    if (res?.error) {
       message.error("登录失败");
+    } else {
+      message.success("登录成功");
+      router.push("/home");
     }
 
     setLoading(false);
